@@ -51,11 +51,32 @@ contract('TokenSale', function(accounts) {
 			assert.equal(balance.toNumber(), tokensAvailable - numberOfTokens);
 			return tokenSaleInstance.buyTokens(numberOfTokens, { from: buyer, value : 1 });
 		}).then(assert.fail).catch(function(error) {
-			assert(error.message.indexOf('revert') >= 0, 'msg.value must equal number of tokens in wei');
+			assert(error.toString().indexOf('revert') >= 0, 'msg.value must equal number of tokens in wei');
 			return tokenSaleInstance.buyTokens(800000, { from: buyer, value : numberOfTokens * tokenPrice });
 		}).then(assert.fail).catch(function(error) {
-			assert(error.message.indexOf('revert') >= 0, 'cannot purchase more tokens than available');
+			assert(error.toString().indexOf('revert') >= 0, 'cannot purchase more tokens than available');
 			return null;
+		});
+	});
+
+	it('ends token sale', function() {
+		return Token.deployed().then(function(instance) {
+			tokenInstance = instance;
+			return TokenSale.deployed();
+		}).then(function(instance) {
+			tokenSaleInstance = instance;
+			return tokenSaleInstance.endSale({ from: buyer });		
+		}).then(assert.fail).catch(function(error) {
+			assert(error.toString().indexOf('revert' >= 0, 'must be admin to end sale'));
+			return tokenSaleInstance.endSale({ from: admin });
+		}).then(function(receipt) {
+			return tokenInstance.balanceOf(admin);
+		}).then(function(balance) {
+			assert.equal(balance.toNumber(), 999990, 'returns all unsold tokens to admin');
+			// Check that token price was reset when selfDestruct was called
+			return web3.eth.getBalance(tokenSaleInstance.address)
+		}).then(function(balance){
+			assert.equal(balance, 0);
 		});
 	});
 

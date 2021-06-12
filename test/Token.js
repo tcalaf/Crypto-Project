@@ -35,7 +35,7 @@ contract('Token', function(accounts) {
 			tokenInstance = instance;
 			return tokenInstance.transfer.call(accounts[1], 99999999999999);
 		}).then(assert.fail).catch(function(error) {
-			assert(error.message.indexOf('revert') >= 0, 'error message must contain revert');
+			assert(error.toString().indexOf('revert') >= 0, 'error message must contain revert');
 			return tokenInstance.transfer.call(accounts[1], 250000, {from: accounts[0]});
 		}).then(function(success) {
 			assert.equal(success, true, 'it returns true');
@@ -86,10 +86,10 @@ contract('Token', function(accounts) {
 		}).then(function(receipt) {
 			return tokenInstance.transferFrom(fromAccount, toAccount, 9999, { from: spendingAccount });
 		}).then(assert.fail).catch(function(error) {
-			assert(error.message.indexOf('revert') >= 0, 'cannot transfer value larger than balance');
+			assert(error.toString().indexOf('revert') >= 0, 'cannot transfer value larger than balance');
 			return tokenInstance.transferFrom(fromAccount, toAccount, 20, { from: spendingAccount });
 		}).then(assert.fail).catch(function(error) {
-			assert(error.message.indexOf('revert') >= 0, 'cannot transfer value larger than approved amount');
+			assert(error.toString().indexOf('revert') >= 0, 'cannot transfer value larger than approved amount');
 			return tokenInstance.transferFrom.call(fromAccount, toAccount, 10, { from: spendingAccount });
 		}).then(function(success) {
 			assert.equal(success, true);
